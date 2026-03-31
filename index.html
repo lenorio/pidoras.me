@@ -20,12 +20,9 @@
             font-family: 'Inter', sans-serif;
             color: #000000;
             overflow: hidden;
-            /* Курсор в виде указателя, так как всё кликабельно */
             cursor: pointer;
             user-select: none;
         }
-
-        /* Чтобы ссылка работала на весь экран */
         .main-link {
             text-decoration: none;
             color: inherit;
@@ -106,7 +103,6 @@
             list-style: none;
             position: absolute;
             width: 100%;
-            /* 9 слов + 1 дубликат = 18 секунд */
             animation: scroll-up 18s infinite cubic-bezier(0.8, 0, 0.2, 1);
         }
 
@@ -119,8 +115,6 @@
             padding: 0 35px;
             white-space: nowrap;
         }
-
-        /* Анимация для 9 слов + копия (10 позиций) */
         @keyframes scroll-up {
             0%, 9%     { transform: translateY(0); }
             11%, 20%   { transform: translateY(-80px); }
