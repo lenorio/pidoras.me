@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список пидорасов хвх</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
+            line-height: 1.6; 
+            padding: 40px 20px; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background-color: #f6f8fa;
+            color: #24292e;
+        }
+        h1 { 
+            text-align: center; 
+            border-bottom: 2px solid #eaecef; 
+            padding-bottom: 10px; 
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            background: #fff;
+            border: 1px solid #d1d5da;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(27,31,35,0.12);
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        th, td { 
+            padding: 12px 15px; 
+            text-align: left; 
+            border-bottom: 1px solid #eaecef; 
+        }
+        th { 
+            background-color: #f6f8fa; 
+            font-weight: 600;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f1f3f5; }
+
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.1em;
+            border-top: 1px solid #d1d5da;
+        }
+        .tg-link {
+            font-weight: bold;
+            color: #2482c2;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .loading { text-align: center; color: #666; padding: 20px; }
+        .error { color: #d73a49; text-align: center; padding: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Список пидорасов HvH</h1>
+
+    <div class="table-container" id="content">
+        <p class="loading">Загрузка данных из GitHub...</p>
+    </div>
+
+    <div class="footer">
+        Нашли долбаеба на ХвХ? Пишите мне! <br>
+        <a href="https://t.me/lenorio" target="_blank" class="tg-link">Добавить человека в список</a>
+    </div>
+
+    <script>
+        async function fetchList() {
+            // Ссылка на RAW файл (обязательно укажи верную ветку, обычно main или master)
+            const url = 'https://raw.githubusercontent.com/lenorio/pidoras.me/main/list.txt';
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Не удалось загрузить list.txt. Проверьте путь к файлу.');
+                
+                const text = await response.text();
+                // Разбиваем на строки и убираем пустые
+                const rows = text.split('\n').filter(line => line.trim().length > 10);
+                
+                if (rows.length === 0) {
+                    document.getElementById('content').innerHTML = '<p class="loading">Список пока пуст.</p>';
+                    return;
+                }
+
+                let html = '<table>';
+                html += `<thead>
+                            <tr>
+                                <th>Имя / Ссылка</th>
+                                <th>Причина</th>
+                                <th>Доказательства</th>
+                            </tr>
+                         </thead><tbody>`;
+
+                rows.forEach(row => {
+                    // Регулярка под твой формат: [NAME](LINK) | [REASON] | "[PROOF]"
+                    // Учитываем возможные пробелы вокруг разделителей
+                    const regex = /\[(.*?)\]\((.*?)\)\s*\|\s*\[(.*?)\]\s*\|\s*"(.*?)"/;
+                    const match = row.match(regex);
+
+                    if (match) {
+                        const [_, name, link, reason, proof] = match;
+                        
+                        // Парсим ссылку внутри доказательств, если она там есть [текст](ссылка)
+                        const proofRegex = /\[(.*?)\]\((.*?)\)/;
+                        const proofMatch = proof.match(proofRegex);
+                        let proofHtml = proof;
+
+                        if (proofMatch) {
+                            proofHtml = `<a href="${proofMatch[2]}" target="_blank">${proofMatch[1]}</a>`;
+                        }
+
+                        html += `<tr>
+                            <td><a href="${link}" target="_blank"><strong>${name}</strong></a></td>
+                            <td>${reason}</td>
+                            <td>${proofHtml}</td>
+                        </tr>`;
+                    }
+                });
+
+                html += '</tbody></table>';
+                document.getElementById('content').innerHTML = html;
+
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<p class="error">Ошибка: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+
+        // Запуск при загрузке страницы
+        fetchList();
+    </script>
+</body>
+</html>
