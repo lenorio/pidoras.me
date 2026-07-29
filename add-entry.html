@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Добавить запись — pidoras.me</title>
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        padding: 40px 20px;
+        max-width: 700px;
+        margin: 0 auto;
+        background-color: #f6f8fa;
+        color: #24292e;
+    }
+    h1 {
+        text-align: center;
+        border-bottom: 2px solid #eaecef;
+        padding-bottom: 10px;
+    }
+    .card {
+        background: #fff;
+        border: 1px solid #d1d5da;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(27,31,35,0.12);
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        margin-top: 16px;
+        font-size: 0.9em;
+    }
+    label:first-of-type { margin-top: 0; }
+    .hint {
+        font-weight: 400;
+        color: #6a737d;
+        font-size: 0.85em;
+        display: block;
+        margin-top: 2px;
+    }
+    input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        border: 1px solid #d1d5da;
+        border-radius: 6px;
+        font-size: 0.95em;
+        font-family: inherit;
+    }
+    input:focus {
+        outline: none;
+        border-color: #0366d6;
+        box-shadow: 0 0 0 3px rgba(3,102,214,0.15);
+    }
+    .output-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+    }
+    button {
+        background-color: #2ea44f;
+        color: #fff;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 0.85em;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    button:hover { background-color: #2c974b; }
+    button:active { background-color: #298e46; }
+    button.copied { background-color: #6a737d; }
+    pre#output {
+        background: #f6f8fa;
+        border: 1px solid #d1d5da;
+        border-radius: 6px;
+        padding: 14px;
+        white-space: pre-wrap;
+        word-break: break-all;
+        font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        font-size: 0.85em;
+        min-height: 20px;
+    }
+    .steps {
+        font-size: 0.9em;
+        color: #444;
+    }
+    .steps ol { padding-left: 20px; }
+    .steps a { color: #0366d6; }
+</style>
+</head>
+<body>
+
+<h1>Добавить запись</h1>
+
+<div class="card">
+    <label>Имя / ник
+        <span class="hint">Как будет отображаться ссылкой в таблице</span>
+    </label>
+    <input type="text" id="name" placeholder="fuzi">
+
+    <label>Ссылка на профиль
+        <span class="hint">Steam-профиль, скриншот и т.п. — куда ведёт клик по имени</span>
+    </label>
+    <input type="text" id="link" placeholder="https://steamcommunity.com/profiles/...">
+
+    <label>Причина
+        <span class="hint">Можно перечислить через запятую</span>
+    </label>
+    <input type="text" id="reason" placeholder="токсичное общение, фейкинг именем">
+
+    <label>Текст пруфа
+        <span class="hint">Подпись ссылки-доказательства</span>
+    </label>
+    <input type="text" id="proofText" value="Steam Profile">
+
+    <label>Ссылка на пруф</label>
+    <input type="text" id="proofLink" placeholder="https://steamcommunity.com/profiles/...">
+
+    <div class="output-label">
+        <label style="margin:0;">Готовая строка</label>
+        <button id="copyBtn" onclick="copyOutput()">Скопировать</button>
+    </div>
+    <pre id="output"></pre>
+</div>
+
+<div class="card steps">
+    <strong>Как вставить в список:</strong>
+    <ol>
+        <li>Заполни поля выше — строка внизу обновляется сама.</li>
+        <li>Нажми «Скопировать».</li>
+        <li>Открой <a href="https://github.com/lenorio/pidoras.me/edit/main/list.txt" target="_blank">list.txt на GitHub (сразу в режиме редактирования)</a>.</li>
+        <li>Вставь строку в конец файла (с новой строки) и нажми «Commit changes».</li>
+    </ol>
+</div>
+
+<script>
+    const fields = ['name', 'link', 'reason', 'proofText', 'proofLink'];
+    const output = document.getElementById('output');
+
+    function update() {
+        const name = document.getElementById('name').value.trim();
+        const link = document.getElementById('link').value.trim();
+        const reason = document.getElementById('reason').value.trim();
+        const proofText = document.getElementById('proofText').value.trim();
+        const proofLink = document.getElementById('proofLink').value.trim();
+
+        if (!name && !link && !reason && !proofLink) {
+            output.textContent = '';
+            return;
+        }
+
+        output.textContent = `[${name}](${link}) | [${reason}] | "[${proofText}](${proofLink})"`;
+    }
+
+    fields.forEach(id => document.getElementById(id).addEventListener('input', update));
+
+    function copyOutput() {
+        const text = output.textContent;
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('copyBtn');
+            const original = btn.textContent;
+            btn.textContent = 'Скопировано ✓';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = original;
+                btn.classList.remove('copied');
+            }, 1500);
+        });
+    }
+</script>
+
+</body>
+</html>
